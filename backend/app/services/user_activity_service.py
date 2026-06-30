@@ -10,7 +10,8 @@ from sqlalchemy import desc, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.models.admin_console import Referral, VerificationRequest
+from app.models.admin_console import VerificationRequest
+from app.models.referral import Referral
 from app.models.comment import Comment
 from app.models.connection import Connection, ConnectionStatus
 from app.models.meeting import Meeting
