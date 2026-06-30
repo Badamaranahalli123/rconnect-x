@@ -7,7 +7,7 @@ import string
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.admin_console import Referral
+from app.models.referral import Referral, ReferralStatus
 from app.models.user import User
 
 _REFERRAL_ALPHABET = string.ascii_uppercase + string.digits
