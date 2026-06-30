@@ -1,4 +1,5 @@
 from app.models.user import User, UserRole
+from app.models.referral import Referral, ReferralStatus
 from app.models.bug import Bug, BugStatus, BugPriority
 from app.models.post import Post, PostLike, PollVote, PostType
 from app.models.comment import Comment
@@ -15,15 +16,14 @@ from app.models.news_bookmark import NewsBookmark
 from app.models.news_interaction import NewsLike, NewsComment
 from app.models.workspace import FileAttachment, Milestone, Task, TaskPriority, TaskStatus, Workspace
 from app.models.meeting import Meeting
-from app.models.school import School, Classroom, Homework  # ← ADD THIS
+from app.models.school import School, Classroom, Homework
 from app.models.platform import PlatformRole
 from app.models.admin_console import (
     AdminAnnouncement,
     AdminAuditLog,
     AnnouncementDismissal,
     ContentReport,
-    Referral,
-    VerificationRequest,
+    VerificationRequest,  # ✅ REFERRAL REMOVED FROM HERE!
 )
 from app.models.broadcast import AdminBroadcast
 from app.models.push_token import PushToken
@@ -32,9 +32,9 @@ from app.models.streak import UserDailyLogin
 __all__ = [
     "User",
     "UserRole",
-    "School",           # ← ADD
-    "Classroom",        # ← ADD
-    "Homework",         # ← ADD
+    "School",
+    "Classroom",
+    "Homework",
     "Post",
     "PostLike",
     "PollVote",
@@ -77,7 +77,8 @@ __all__ = [
     "AdminBroadcast",
     "PushToken",
     "ContentReport",
-    "Referral",
-    "VerificationRequest",
+    "VerificationRequest",  # ✅ Referral removed from here
     "UserDailyLogin",
+    "Referral",              # ✅ Kept only from referral.py
+    "ReferralStatus",        # ✅ Kept only from referral.py
 ]
