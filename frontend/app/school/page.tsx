@@ -47,7 +47,7 @@ export default function SchoolPage() {
   const [schoolName, setSchoolName] = useState('')
   const [schoolAddress, setSchoolAddress] = useState('')
   const [showCreateSchool, setShowCreateSchool] = useState(false)
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'classrooms' | 'homework' | 'tracking'>('dashboard')
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'classrooms' | 'homework' | 'tracking' | 'ai-generator'>('dashboard')
   const [className, setClassName] = useState('')
   const [classGrade, setClassGrade] = useState('')
   const [classSection, setClassSection] = useState('')
@@ -57,6 +57,12 @@ export default function SchoolPage() {
   const [selectedClassroomId, setSelectedClassroomId] = useState('')
   const [creatingClassroom, setCreatingClassroom] = useState(false)
   const [creatingHomework, setCreatingHomework] = useState(false)
+
+  // AI Question Generator States
+  const [aiContent, setAiContent] = useState('')
+  const [aiQuestions, setAiQuestions] = useState<any[]>([])
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiNumQuestions, setAiNumQuestions] = useState(5)
 
   const token = useAuthStore((s) => s.token)
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1'
@@ -256,6 +262,54 @@ export default function SchoolPage() {
     }
   }
 
+  // ─── AI Question Generator ─────────────────────────────
+  const generateAIQuestions = async () => {
+    if (!aiContent.trim() || aiContent.length < 50) {
+      alert('Please enter at least 50 characters of content')
+      return
+    }
+
+    setAiLoading(true)
+    setAiQuestions([])
+    
+    try {
+      const url = `${baseUrl}/schools/ai/generate-questions`
+      
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          content: aiContent,
+          num_questions: aiNumQuestions,
+          grade_level: 'middle school',
+          subject: 'general'
+        })
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        setAiQuestions(data.questions || [])
+      } else {
+        const error = await res.text()
+        alert('Error generating questions: ' + error)
+      }
+    } catch (error) {
+      console.error('Error:', error)
+      alert('Error generating questions. Make sure backend is running.')
+    } finally {
+      setAiLoading(false)
+    }
+  }
+
+  const copyQuestionsToClipboard = () => {
+    const text = aiQuestions.map((q, i) => `${i+1}. ${q.question}`).join('\n\n')
+    navigator.clipboard.writeText(text)
+    alert('Questions copied to clipboard!')
+  }
+
   // ─── Render ────────────────────────────────────────────
   return (
     <div className="max-w-7xl mx-auto p-6">
@@ -301,7 +355,7 @@ export default function SchoolPage() {
 
       {/* Tabs */}
       <div className="flex flex-wrap gap-2 mb-6 border-b border-gray-200 dark:border-gray-700 pb-2">
-        {['dashboard', 'classrooms', 'homework', 'tracking'].map((tab) => (
+        {['dashboard', 'classrooms', 'homework', 'tracking', 'ai-generator'].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab as any)}
@@ -311,7 +365,7 @@ export default function SchoolPage() {
                 : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
             }`}
           >
-            {tab}
+            {tab === 'ai-generator' ? 'AI Generator' : tab}
           </button>
         ))}
       </div>
@@ -320,17 +374,17 @@ export default function SchoolPage() {
       {activeTab === 'dashboard' && selectedSchool && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow border border-gray-200 dark:border-gray-700">
-            <h3 className="font-semibold text-gray-900 dark:text-white">📚 Classrooms</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-white">Classrooms</h3>
             <p className="text-2xl font-bold text-blue-600">{classrooms.length}</p>
             <p className="text-sm text-gray-500 dark:text-gray-400">Total classrooms</p>
           </div>
           <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow border border-gray-200 dark:border-gray-700">
-            <h3 className="font-semibold text-gray-900 dark:text-white">📝 Homework</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-white">Homework</h3>
             <p className="text-2xl font-bold text-purple-600">{homework.length}</p>
             <p className="text-sm text-gray-500 dark:text-gray-400">Total assignments</p>
           </div>
           <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow border border-gray-200 dark:border-gray-700">
-            <h3 className="font-semibold text-gray-900 dark:text-white">👀 Students</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-white">Students</h3>
             <p className="text-2xl font-bold text-green-600">{students.length}</p>
             <p className="text-sm text-gray-500 dark:text-gray-400">Active students</p>
           </div>
@@ -342,7 +396,7 @@ export default function SchoolPage() {
         <div>
           {/* Create Classroom Form */}
           <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow border border-gray-200 dark:border-gray-700 mb-6">
-            <h3 className="font-semibold text-lg mb-4 text-gray-900 dark:text-white">➕ Create Classroom</h3>
+            <h3 className="font-semibold text-lg mb-4 text-gray-900 dark:text-white">Create Classroom</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <input
                 type="text"
@@ -397,7 +451,7 @@ export default function SchoolPage() {
         <div>
           {/* Create Homework Form */}
           <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow border border-gray-200 dark:border-gray-700 mb-6">
-            <h3 className="font-semibold text-lg mb-4 text-gray-900 dark:text-white">📝 Post Homework</h3>
+            <h3 className="font-semibold text-lg mb-4 text-gray-900 dark:text-white">Post Homework</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
               <input
                 type="text"
@@ -458,7 +512,7 @@ export default function SchoolPage() {
       {/* Tracking Tab */}
       {activeTab === 'tracking' && selectedSchool && (
         <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow border border-gray-200 dark:border-gray-700">
-          <h3 className="font-semibold text-lg mb-4 text-gray-900 dark:text-white">👀 Student Engagement Tracking</h3>
+          <h3 className="font-semibold text-lg mb-4 text-gray-900 dark:text-white">Student Engagement Tracking</h3>
           {students.length === 0 ? (
             <p className="text-gray-500 dark:text-gray-400 text-center py-8">No student data yet. Start posting homework to track engagement!</p>
           ) : (
@@ -483,6 +537,97 @@ export default function SchoolPage() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* AI Generator Tab */}
+      {activeTab === 'ai-generator' && selectedSchool && (
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow border border-gray-200 dark:border-gray-700">
+          <h3 className="font-semibold text-lg mb-4 text-gray-900 dark:text-white">AI Question Generator</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+            Paste your homework content or lesson text. The AI will generate questions for students.
+            <span className="text-yellow-600 dark:text-yellow-400 block mt-1">
+              Note: Questions only - no answers provided. Students need to find answers themselves.
+            </span>
+          </p>
+
+          <div className="flex items-center gap-3 mb-3">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Number of Questions:
+            </label>
+            <select
+              value={aiNumQuestions}
+              onChange={(e) => setAiNumQuestions(Number(e.target.value))}
+              className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
+            >
+              {[3, 5, 7, 10].map((n) => (
+                <option key={n} value={n}>{n}</option>
+              ))}
+            </select>
+          </div>
+
+          <textarea
+            className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white min-h-[120px]"
+            placeholder="Paste your content here (at least 50 characters)..."
+            value={aiContent}
+            onChange={(e) => setAiContent(e.target.value)}
+          />
+
+          <button
+            onClick={generateAIQuestions}
+            disabled={aiLoading}
+            className="mt-3 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition disabled:opacity-50 flex items-center gap-2"
+          >
+            {aiLoading ? (
+              <>
+                <span className="animate-spin">⏳</span>
+                Generating...
+              </>
+            ) : (
+              'Generate Questions'
+            )}
+          </button>
+
+          {aiQuestions.length > 0 && (
+            <div className="mt-6">
+              <h4 className="font-semibold mb-3 text-gray-900 dark:text-white flex items-center gap-2">
+                Generated Questions ({aiQuestions.length})
+                <button
+                  onClick={copyQuestionsToClipboard}
+                  className="text-sm text-blue-600 hover:text-blue-700"
+                >
+                  Copy All
+                </button>
+              </h4>
+              <div className="space-y-3">
+                {aiQuestions.map((q, idx) => (
+                  <div key={idx} className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                    <div className="flex items-start gap-2">
+                      <span className="font-bold text-purple-600 dark:text-purple-400 min-w-[24px]">
+                        {idx + 1}.
+                      </span>
+                      <div>
+                        <p className="text-gray-800 dark:text-gray-200">{q.question}</p>
+                        <div className="flex gap-2 mt-1 flex-wrap">
+                          <span className="text-xs px-2 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full">
+                            {q.type || 'comprehension'}
+                          </span>
+                          <span className="text-xs px-2 py-0.5 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 rounded-full">
+                            {q.difficulty || 'medium'}
+                          </span>
+                          {q.topic && (
+                            <span className="text-xs px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full">
+                              {q.topic}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
