@@ -25,13 +25,15 @@ class QuestionGenerator:
         prompt = f"""
         You are a teacher creating questions for {grade_level} students.
         
+        Subject: {subject}
+        
         Content to analyze:
         {content[:3000]}  # Limit to 3000 chars
         
         Generate {num_questions} questions based on this content.
         Questions should test understanding, not just recall.
         
-        Important: ONLY return questions. DO NOT provide answers.
+        IMPORTANT: ONLY return questions. DO NOT provide answers.
         
         Format the response as a JSON array:
         [
@@ -98,7 +100,6 @@ class QuestionGenerator:
         """Extract questions from plain text response"""
         lines = text.strip().split('\n')
         questions = []
-        current_question = {}
         
         for line in lines:
             line = line.strip()
@@ -107,14 +108,12 @@ class QuestionGenerator:
             
             # Check if it's a question (ends with ?)
             if '?' in line and len(line) > 10:
-                # Check if it has a number prefix
-                if line[0].isdigit() and '.' in line[:3]:
-                    question_text = line[line.index('.')+1:].strip() if '.' in line else line
-                else:
-                    question_text = line
+                # Remove number prefixes (e.g., "1.", "2.")
+                import re
+                cleaned = re.sub(r'^\d+[\.\)]\s*', '', line)
                 
                 questions.append({
-                    "question": question_text,
+                    "question": cleaned,
                     "type": "comprehension",
                     "difficulty": "medium",
                     "topic": "general"
