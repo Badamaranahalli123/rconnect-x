@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     
     # OpenRouter API (for AI features)
     OPENROUTER_API_KEY: str = ""
-    OPENROUTER_API_URL: str = "https://openrouter.ai/api/v1/chat/completions"
+    OPENROUTER_API_URL: str = ""
     
     # Cloudinary (for image uploads)
     CLOUDINARY_CLOUD_NAME: Optional[str] = None
