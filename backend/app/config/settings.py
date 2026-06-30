@@ -3,15 +3,17 @@ from typing import List
 
 class Settings(BaseSettings):
     # Database
-    DATABASE_URL: str = "postgresql+asyncpg://postgres:yourpassword@localhost:5432/rconnectx"
+    DATABASE_URL: str = "postgresql+asyncpg://postgre:yourpassword@localhost:5432/rconnectx"
     GNEWS_API_KEY: str = ""
     DEVTO_API_KEY: str = ""
     NEWS_API_KEY: str = ""
+    
     # App
     APP_NAME: str = "RConnectX"
     DEBUG: bool = True
     VERSION: str = "1.0.0"
     API_PREFIX: str = "/api/v1"
+    FRONTEND_URL: str = "http://localhost:3000"
     
     # Security
     SECRET_KEY: str = "your-super-secret-key-change-this"
@@ -31,11 +33,14 @@ class Settings(BaseSettings):
     
     # APIs
     OPENROUTER_API_KEY: str = ""
-    OPENAI_API_KEY: str = "" 
+    OPENAI_API_KEY: str = ""
+    
+    # Email (Resend)
+    RESEND_API_KEY: str = ""  # ✅ ADD THIS
     
     # VAPID Keys
     VAPID_PUBLIC_KEY: str = "04275ece093b27ce4a6d10c1c144d150a7c656524a2ae67a1feebd3cf454df3d38786446792a73e85ecd4fd2a4dfca24069b7b5ba6e0875b23d570660afeab670d"
-    VAPID_PRIVATE_KEY: str = "-----BEGIN PRIVATE KEY-----\nMIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgneUfnIGsjCfIvwzD\nglrCjKKdsljmMrtSAR0JA3kpAb+hRANCAAQnXs4JOyfOSm0QwcFE0VCnxlZSSirm\neh/uvTz0VN89OHhkRnkqc+hezU/SpN/KJAabe1um4IdbI9VwZgr+q2cN\n-----END PRIVATE KEY-----"
+    VAPID_PRIVATE_KEY: str = ""
     
     model_config = SettingsConfigDict(
         env_file=".env",
