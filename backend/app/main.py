@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.api import schools, meetings, ai, bugs
+from app.api.referrals import router as referrals_router  # ✅ ADDED REFERRAL
 from app.config.settings import get_settings
 from app.database import init_db
 from app.routes import api_router
@@ -109,7 +110,8 @@ async def unhandled_exception_handler(_: Request, exc: Exception):
 app.include_router(schools.router, prefix=settings.API_PREFIX)
 app.include_router(meetings.router, prefix=settings.API_PREFIX)
 app.include_router(ai.router, prefix=settings.API_PREFIX)
-app.include_router(bugs.router, prefix=settings.API_PREFIX)  # ✅ BUG ROUTER ADDED
+app.include_router(bugs.router, prefix=settings.API_PREFIX)
+app.include_router(referrals_router, prefix=settings.API_PREFIX)  # ✅ REFERRAL ROUTER ADDED
 
 # ✅ THEN THE REST (AFTER - lower priority)
 app.include_router(api_router, prefix=settings.API_PREFIX)
